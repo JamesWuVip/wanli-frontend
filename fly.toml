@@ -1,0 +1,30 @@
+# fly.toml app configuration file generated for wanli-frontend
+
+app = "wanli-frontend"
+primary_region = "nrt"
+
+[build]
+
+[env]
+  NODE_ENV = "production"
+  VITE_API_BASE_URL = "https://wanli-backend.fly.dev"
+
+[http_service]
+  internal_port = 4173
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+
+[deploy]
+  release_command = "npm run build"
+
+[[statics]]
+  guest_path = "/app/dist"
+  url_prefix = "/"
