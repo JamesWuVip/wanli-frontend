@@ -1,0 +1,127 @@
+name: Staging to Main CI/CD
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+  push:
+    branches: [ main ]
+
+jobs:
+  staging-validation:
+    name: Validate Staging Branch
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.head_ref == 'staging'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run comprehensive tests
+        run: |
+          npm run lint
+          npm run type-check
+          npm run test:unit
+
+      - name: Build production version
+        run: npm run build
+
+      - name: Run E2E tests (if available)
+        run: |
+          if npm run | grep -q "test:e2e"; then
+            npm run test:e2e
+          else
+            echo "No E2E tests configured, skipping..."
+          fi
+
+      - name: Security audit
+        run: npm audit --audit-level=moderate
+
+      - name: Check bundle size
+        run: |
+          npm run build
+          du -sh dist/
+          echo "Bundle size check completed"
+
+  auto-merge-to-main:
+    name: Auto merge staging to main
+    runs-on: ubuntu-latest
+    needs: staging-validation
+    if: github.event_name == 'pull_request' && github.head_ref == 'staging' && github.event.pull_request.merged == true
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+
+      - name: Switch environment config to production
+        run: |
+          if [ -f .env.production ]; then
+            cp .env.production .env
+            git add .env
+            git commit -m "chore: switch to production environment config" || echo "No changes to commit"
+          fi
+
+      - name: Create release tag
+        run: |
+          VERSION=$(date +"v%Y.%m.%d-%H%M%S")
+          git tag -a $VERSION -m "Release $VERSION from staging"
+          git push origin $VERSION
+          echo "Created release tag: $VERSION"
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for production
+        run: npm run build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+
+      - name: Setup flyctl (backup deployment)
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io (backup)
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Notify deployment success
+        run: |
+          echo "🚀 Production deployment successful!"
+          echo "📦 Vercel: https://wanli-frontend.vercel.app"
+          echo "🛩️  Fly.io: https://wanli-frontend.fly.dev"
