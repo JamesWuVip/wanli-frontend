@@ -109,7 +109,7 @@ const envInfo = computed(() => {
 .main-content {
   background: white;
   border-radius: 1rem;
-  padding: 2rem;
+  padding: 3rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
@@ -126,14 +126,12 @@ const envInfo = computed(() => {
   border-radius: 0.5rem;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .feature-icon {
@@ -149,7 +147,7 @@ const envInfo = computed(() => {
 }
 
 .feature-description {
-  color: #718096;
+  color: #4a5568;
   line-height: 1.6;
 }
 
@@ -190,8 +188,7 @@ const envInfo = computed(() => {
 .info-value {
   font-weight: 600;
   color: #2d3748;
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.9rem;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 }
 
 @media (max-width: 768px) {
@@ -204,7 +201,7 @@ const envInfo = computed(() => {
   }
 
   .main-content {
-    padding: 1.5rem;
+    padding: 2rem 1rem;
   }
 
   .features-grid {
@@ -213,8 +210,8 @@ const envInfo = computed(() => {
 
   .info-item {
     flex-direction: column;
+    align-items: flex-start;
     gap: 0.5rem;
-    text-align: center;
   }
 }
 </style>
