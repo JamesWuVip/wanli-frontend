@@ -1,7 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import AssignmentList from '../views/AssignmentList.vue'
-import SubmissionResult from '../views/SubmissionResult.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+
+import HomePage from '../views/HomePage.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,80 +8,39 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
-    },
-    {
-      path: '/assignments',
-      name: 'assignments',
-      component: AssignmentList,
+      component: HomePage,
       meta: {
-        requiresAuth: true,
-        title: '我的作业'
-      }
-    },
-    {
-      path: '/submissions/:submissionId/result',
-      name: 'submission-result',
-      component: SubmissionResult,
-      meta: {
-        requiresAuth: true,
-        title: '作业结果'
+        title: '首页',
       },
-      props: true
     },
     {
       path: '/about',
       name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue'),
+      meta: {
+        title: '关于',
+      },
     },
     {
-      path: '/teacher',
-      name: 'teacher-dashboard',
-      component: () => import('../views/TeacherDashboard.vue'),
+      path: '/env-test',
+      name: 'env-test',
+      component: () => import('../views/EnvTestPage.vue'),
       meta: {
-        requiresAuth: true,
-        requiresTeacher: true,
-        title: '教师控制台'
-      }
+        title: '环境变量测试',
+      },
     },
-    {
-      path: '/teacher/assignments',
-      name: 'teacher-assignments',
-      component: () => import('../views/TeacherAssignments.vue'),
-      meta: {
-        requiresAuth: true,
-        requiresTeacher: true,
-        title: '作业管理'
-      }
-    },
-    {
-      path: '/teacher/submissions',
-      name: 'teacher-submissions',
-      component: () => import('../views/TeacherSubmissions.vue'),
-      meta: {
-        requiresAuth: true,
-        requiresTeacher: true,
-        title: '提交管理'
-      }
-    }
   ],
-})
+});
 
-// 路由守卫 - 检查认证状态
-router.beforeEach((to, from, next) => {
-  // 检查路由是否需要认证
-  if (to.meta.requiresAuth) {
-    // 检查 localStorage 中的 token
-    const token = localStorage.getItem('auth_token')
-    if (!token) {
-      next('/')
-      return
-    }
+// 路由守卫 - 设置页面标题
+router.beforeEach((to, _from, next) => {
+  // 设置页面标题
+  if (to.meta?.title) {
+    document.title = `${to.meta.title} - 万里前端`;
+  } else {
+    document.title = '万里前端';
   }
-  next()
-})
+  next();
+});
 
-export default router
+export default router;
