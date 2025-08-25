@@ -1,303 +1,197 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-
-const router = useRouter()
-const authStore = useAuthStore()
-const username = ref('')
-const password = ref('')
-
-// 登录处理
-const handleLogin = async () => {
-  if (!username.value || !password.value) {
-    return
-  }
-
-  try {
-    await authStore.login(username.value, password.value)
-    // 登录成功，跳转到作业列表页面
-    router.push('/assignments')
-  } catch (error) {
-    console.error('登录失败:', error)
-  }
-}
-
-// 快速登录（测试用）
-const quickLogin = (user = 'test_student1', pass = 'password123') => {
-  username.value = user
-  password.value = pass
-  handleLogin()
-}
-
-// 如果已登录，直接跳转
-onMounted(() => {
-  if (authStore.isAuthenticated) {
-    router.push('/assignments')
-  }
-})
+// 万里书院首页
 </script>
 
 <template>
-  <div class="login-container">
-    <div class="login-card">
-      <div class="login-header">
-        <h1>万里书院</h1>
-        <p>在线作业系统</p>
-      </div>
-
-      <form @submit.prevent="handleLogin" class="login-form">
-        <div class="form-group">
-          <label for="username">用户名</label>
-          <input
-            id="username"
-            v-model="username"
-            type="text"
-            placeholder="请输入用户名"
-            :disabled="authStore.loading"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            placeholder="请输入密码"
-            :disabled="authStore.loading"
-            required
-          />
-        </div>
-
-        <div class="error-message" v-if="authStore.error">
-          {{ authStore.error }}
-        </div>
-        
-        <button 
-          type="submit"
-          :disabled="authStore.loading" 
-          class="login-btn"
-        >
-          {{ authStore.loading ? '登录中...' : '登录' }}
-        </button>
-      </form>
-
-      <!-- 测试用快速登录按钮 -->
-      <div class="quick-login">
-        <p class="quick-login-title">快速登录（测试）：</p>
-        <div class="quick-login-buttons">
-          <button 
-            @click="quickLogin('test_student1', 'password123')"
-            class="quick-btn student-btn"
-            :disabled="authStore.loading"
-          >
-            学生账号
-          </button>
-          <button 
-            @click="quickLogin('test_hq_teacher', 'password123')"
-            class="quick-btn teacher-btn"
-            :disabled="authStore.loading"
-          >
-            教师账号
-          </button>
+  <main class="home-container">
+    <div class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title">万里书院</h1>
+        <p class="hero-subtitle">智慧学习，成就未来</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary">开始学习</button>
+          <button class="btn btn-secondary">了解更多</button>
         </div>
       </div>
     </div>
-  </div>
+    
+    <div class="features-section">
+      <div class="container">
+        <h2 class="section-title">核心功能</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📚</div>
+            <h3>在线课程</h3>
+            <p>丰富的课程资源，专业的教学内容</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">✍️</div>
+            <h3>作业管理</h3>
+            <p>智能作业系统，高效学习管理</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3>互动学习</h3>
+            <p>师生互动，协作学习环境</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>学习分析</h3>
+            <p>数据驱动，个性化学习路径</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 </template>
 
 <style scoped>
-.login-container {
-  min-height: calc(100vh - 200px);
+.home-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hero-section {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-}
-
-.login-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  padding: 3rem;
-  width: 100%;
-  max-width: 400px;
-  animation: slideUp 0.6s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.login-header {
+  min-height: 70vh;
   text-align: center;
-  margin-bottom: 2rem;
-}
-
-.login-header h1 {
-  color: #2d3748;
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.login-header p {
-  color: #718096;
-  font-size: 1rem;
-  margin: 0;
-}
-
-.login-form {
-  margin-bottom: 2rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #2d3748;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.form-group input:disabled {
-  background-color: #f7fafc;
-  cursor: not-allowed;
-}
-
-.error-message {
-  background-color: #fed7d7;
-  color: #c53030;
-  padding: 0.75rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-.login-btn {
-  width: 100%;
-  padding: 0.875rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  padding: 2rem;
+}
+
+.hero-content {
+  max-width: 800px;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 1rem 2rem;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
 }
 
-.login-btn:hover:not(:disabled) {
+.btn-primary {
+  background: #ff6b6b;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #ff5252;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
 }
 
-.login-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+.btn-secondary {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
 }
 
-.quick-login {
-  border-top: 1px solid #e2e8f0;
-  padding-top: 1.5rem;
+.btn-secondary:hover {
+  background: white;
+  color: #667eea;
+  transform: translateY(-2px);
 }
 
-.quick-login-title {
+.features-section {
+  padding: 4rem 2rem;
+  background: white;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-title {
   text-align: center;
-  color: #718096;
-  font-size: 0.9rem;
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 3rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.feature-card {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 15px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+  font-size: 3rem;
   margin-bottom: 1rem;
 }
 
-.quick-login-buttons {
-  display: flex;
-  gap: 0.75rem;
+.feature-card h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
 }
 
-.quick-btn {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 6px;
-  background: white;
-  color: #4a5568;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.feature-card p {
+  color: #666;
+  line-height: 1.6;
 }
 
-.quick-btn:hover:not(:disabled) {
-  border-color: #667eea;
-  color: #667eea;
-  transform: translateY(-1px);
-}
-
-.quick-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.student-btn:hover:not(:disabled) {
-  border-color: #48bb78;
-  color: #48bb78;
-}
-
-.teacher-btn:hover:not(:disabled) {
-  border-color: #ed8936;
-  color: #ed8936;
-}
-
-/* 响应式设计 */
-@media (max-width: 480px) {
-  .login-container {
-    padding: 1rem;
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
   }
   
-  .login-card {
-    padding: 2rem;
+  .hero-subtitle {
+    font-size: 1.2rem;
   }
   
-  .login-header h1 {
-    font-size: 1.75rem;
-  }
-  
-  .quick-login-buttons {
+  .hero-actions {
     flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn {
+    width: 200px;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
